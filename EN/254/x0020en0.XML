@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<inputs>
+<002>
+~SRV(2,5,254,24,32)
+</002>
+<Prop>
+~SRV(2,1,5,24,32)
+</Prop>
+<Event>
+~SRV(2,2,2,24,32)
+</Event>
+<Func>
+~SRV(2,4,2,24,32)
+</Func>
+<Mthd>
+~SRV(2,3,2,24,32)
+</Mthd>
+</inputs>

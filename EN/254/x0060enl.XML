@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<inputs>
+~SRV(254,2,50,15,1)
+	<Alarm>
+	~SRV(6,1,13,x,0)
+	</Alarm>
+~SRV(254,2,51,1,0)
+
+~SRV(254,2,50,15,1)
+	<TAlarm>
+	~SRV(6,1,11,x,0)
+	</TAlarm>
+~SRV(254,2,51,1,0)
+
+~SRV(254,2,50,15,1)
+	<SAlarm>
+	~SRV(6,1,10,x,0)
+	</SAlarm>
+~SRV(254,2,51,1,0)
+
+~SRV(254,2,50,15,1)
+	<FnAlarm>
+	~SRV(6,1,14,x,0)
+	</FnAlarm>
+~SRV(254,2,51,1,0)
+
+~SRV(254,2,50,15,1)
+	<AlarmD>
+	~SRV(6,1,13,x,0)
+	</AlarmD>
+~SRV(254,2,51,1,0)
+
+~SRV(254,2,50,15,1)
+	<T1Alarms>
+	~SRV(6,1,12,x,0)
+	</T1Alarms>
+~SRV(254,2,51,1,0)
+</inputs>

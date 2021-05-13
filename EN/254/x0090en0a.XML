@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<inputs>
+~SRV(254,2,50,63,48)
+	<Analog>
+	~SRV(9,1,16,x,0)
+	</Analog>
+~SRV(254,2,51,1,0)
+
+</inputs>
