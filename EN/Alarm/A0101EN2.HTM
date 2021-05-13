@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html><head><!-- Version 1.0 --><!-- Adding LogicCoils1-16 which are an 16 bit transfer of the variables associated with the coils. This was done to reduce the Arduino burden for each coil bit.--><!-- 	Created the String StrLogicCoil1-16 to be ready for 255 x 8 bit coil status--><title>Arduino PLC Ajax I/O</title>
+
+
+  
+
+  
+  
+  <script>
+
+		//Constants to hold bit masks for desired flags
+		var AllOff = 0;
+		var flagbit1 = 1;    // 2^^0    000...00000001
+		var flagbit2 = 2;    // 2^^1    000...00000010
+		var flagbit3 = 4;    // 2^^2    000...00000100
+		var flagbit4 = 8;    // 2^^3    000...00001000
+		var flagbit5 = 16;   // 2^^4    000...00010000
+		var flagbit6 = 32;   // 2^^5    000...00100000
+		var flagbit7 = 64;   // 2^^6    000...01000000
+		var flagbit8 = 128;  // 2^^7    000...10000000
+		var Mask=0;
+
+		var strXMLService="Services=006"; //Must be 3 digits for service plus variant for service. 98.0 The XML response code determines the data from the Arduino. Service number 0..255
+		var strServiceVariation="0";  //Variation to the the service xml file to be loaded. a..z,0..9
+		var StrVersion="0"; //Version of the XML file to load. Version Number a..z, 0..9
+		strXMLServices=strXMLService+strServiceVariation+StrVersion; //
+		
+		strA0 = "";
+		strA1 = "";
+		strA2 = "";
+		strA3 = "";
+		strA4 = "";
+		strA5 = "";
+		strA6 = "";
+		strA7 = "";
+		strA8 = "";
+		strA9 = "";
+		strA10 = "";
+		strA11 = "";
+		strA12 = "";
+		strA13 = "";
+		strA14 = "";
+		strA15 = "";
+
+		var LED_state =new Array();
+		var val=0;
+		var strButton="";
+
+
+
+
+
+		function changeColor2(ccolor,LED)
+		{
+		document.getElementById('AA'+LED).style.background=ccolor;
+		}
+
+
+
+		function GetArduinoIO()
+		{
+			nocache = "&nocache=" + Math.random() * 1000000;
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function () {
+			    if (this.readyState == 4) {
+			        if (this.status == 200) {
+			            if (this.responseXML != null) {
+			                // XML file received - contains analog values, switch values and LED states
+			                var count;
+			                // get alarm inputs
+			                var num_alarm = this.responseXML.getElementsByTagName('Alarm').length;
+			                for (count = 0; count < num_alarm; count++) {
+			                    document.getElementsByClassName('Alarm')[count].innerHTML =this.responseXML.getElementsByTagName('Alarm')[count].childNodes[0].nodeValue;
+			                } //for
+			                
+			                var num_logic = this.responseXML.getElementsByTagName('TAlarm').length;
+			                for (count = 0; count < num_logic; count++) { val=this.responseXML.getElementsByTagName('TAlarm')[count].childNodes[0].nodeValue;
+			                    document.getElementsByClassName("TAlarm")[count].innerHTML =val;
+									
+			                } //for
+
+
+			                // get Alarm Service input
+			                var num_system = this.responseXML.getElementsByTagName('SAlarm').length;
+			                for (count = 0; count < num_system; count++) {
+			                    document.getElementsByClassName("SAlarm")[count].innerHTML = this.responseXML.getElementsByTagName('SAlarm')[count].childNodes[0].nodeValue;
+			                }//for
+
+	                		 // get Function Alarm input
+			                var num_system = this.responseXML.getElementsByTagName('FnAlarm').length;
+			                for (count = 0; count < num_system; count++) {
+			                    document.getElementsByClassName("FnAlarm")[count].innerHTML = this.responseXML.getElementsByTagName('FnAlarm')[count].childNodes[0].nodeValue;
+			                }//for
+
+	                		 // get Desciption Alarm input
+			                var num_system = this.responseXML.getElementsByTagName('AlarmD').length;
+			                for (count = 0; count < num_system; count++) {
+			                    document.getElementsByClassName("AlarmD")[count].innerHTML = this.responseXML.getElementsByTagName('AlarmD')[count].childNodes[0].nodeValue;
+			                
+
+						if (document.getElementsByClassName("Alarm")[count].innerHTML ==1){document.getElementById('AlarmS'+ count).style.background="red";}
+		                                      		if (document.getElementsByClassName("Alarm")[count].innerHTML ==0){document.getElementById('AlarmS'+ count).style.background="green";}
+					    }//for
+
+			                // get Logic Alarms input
+			                var num_T1 = this.responseXML.getElementsByTagName('T1Alarms').length;
+			                for (count = 0; count < num_T1; count++) {
+			                    document.getElementsByClassName("T1Alarms")[count].innerHTML = this.responseXML.getElementsByTagName('T1Alarms')[count].childNodes[0].nodeValue;
+			                }
+
+ 
+		
+
+			            }
+			        }
+			    }
+			}
+			// send HTTP GET request with LEDs to switch on/off if any
+			request.open("GET", "ajax_inputs" + strButton + strA0 + strA1 + strA2 + strA3 + strA4 + strA5 + strA6 + strA7+ strA8+ strA9+ strA10+ strA11+ strA12+ strA13+ strA14 + strA15 +"&"+ strXMLServices + nocache, true);
+			request.send(null);
+
+			setTimeout('GetArduinoIO()', 10000);
+
+
+			strA0 = "";
+			strA1 = "";
+			strA2 = "";
+			strA3 = "";
+			strA4 = "";
+			strA5 = "";
+			strA6 = "";
+			strA7 = "";
+			strA8 = "";
+			strA9 = "";
+			strA10 = "";
+			strA11 = "";
+			strA12 = "";
+			strA13 = "";
+			strA14 = "";
+			strA15 = "";
+			strButton="";
+
+		UpdateAlarmListColours();
+		}
+
+function UpdateAlarmListColours(){
+			                for (count = 0; count < 15; count++) {
+			                if ((document.getElementById('AlarmS' + count).innerHTML ==1) &&(document.getElementById('AlarmTriggered' + count).innerHTML ==1)) {document.getElementById('AlarmS'+ count).style.background="red"; document.getElementById('AlarmTriggered'+ count).style.background="red"; document.getElementById('SAlarm'+ count).style.background="red";document.getElementById('FnAlarm'+ count).style.background="red";document.getElementById('AlarmTime'+ count).style.background="red";document.getElementById('Alarm'+ count).style.background="red";}
+			                if ((document.getElementById('AlarmS' + count).innerHTML ==1) &&(document.getElementById('AlarmTriggered' + count).innerHTML ==0)) {document.getElementById('AlarmS'+ count).style.background="yellow"; document.getElementById('AlarmTriggered'+ count).style.background="yellow"; document.getElementById('SAlarm'+ count).style.background="yellow";document.getElementById('FnAlarm'+ count).style.background="yellow";document.getElementById('AlarmTime'+ count).style.background="yellow";document.getElementById('Alarm'+ count).style.background="yellow";}
+			                if ((document.getElementById('AlarmS' + count).innerHTML ==0) &&(document.getElementById('AlarmTriggered' + count).innerHTML ==1)) {document.getElementById('AlarmS'+ count).style.background="orange"; document.getElementById('AlarmTriggered'+ count).style.background="orange"; document.getElementById('SAlarm'+ count).style.background="orange";document.getElementById('FnAlarm'+ count).style.background="orange";document.getElementById('AlarmTime'+ count).style.background="orange";document.getElementById('Alarm'+ count).style.background="orange";}
+			                if ((document.getElementById('AlarmS' + count).innerHTML ==0) &&(document.getElementById('AlarmTriggered' + count).innerHTML ==0)) {document.getElementById('AlarmS'+ count).style.background="green"; document.getElementById('AlarmTriggered'+ count).style.background="green"; document.getElementById('SAlarm'+ count).style.background="green";document.getElementById('FnAlarm'+ count).style.background="green";document.getElementById('AlarmTime'+ count).style.background="green";document.getElementById('Alarm'+ count).style.background="green";}
+					    }//for
+}
+function Inf()
+		{
+		// send HTTP GET request with status information
+			nocache = "&nocache=" + Math.random() * 1000000;
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function () {
+			    if (this.readyState == 4) {
+			        if (this.status == 200) {
+			            if (this.responseXML != null) {
+			                // XML file received - contains values
+			                var count;
+							//Get the about info and database version
+							var num_db = this.responseXML.getElementsByTagName('dbH').length;
+			                for (count = 0; count < num_db; count++) {
+			                    strInfo =strInfo+this.responseXML.getElementsByTagName('dbH')[count].childNodes[0].nodeValue;
+			                } //for
+							alert("Arduino Information"+strInfo);
+			            }//if
+			        }//if
+			    }//if
+			}//request fn
+			// send HTTP GET request
+			request.open("GET", "ajax_inputs" +"&"+strXMLService+"z"+StrVersion+nocache, true);
+			request.send(null);
+		strInfo="";	
+		}
+function check()
+  {
+  document.getElementById("check1").checked=true
+document.getElementById("c3").checked=true
+  }
+function uncheck()
+  {
+  document.getElementById("check1").checked=false
+document.getElementById("c3").checked=false
+document.getElementById("c4").checked=true
+  }
+
+
+ function Operandx(onum)
+		{
+		strOperand = "&Operand" +onum+"=" + document.getElementById('Oper'+onum).value;
+		}
+
+	function GetButton(Op)
+		{
+            	strButton = "&CAlarm" +Op+"=" + "1";
+		            
+		}//getButton function
+
+	</script>
+  
+  <style>
+		.IO_box {
+			float: left;
+			margin: 0 10px 10px 0;
+			border: 1px solid blue;
+			padding: 0 5px 0 5px;
+			width: 100px;
+			height: 95%;
+			font-size: 80%;
+		}
+		.IO_box1 {
+			float: left;
+			margin: 0 5px 5px 0;
+			border: 1px solid blue;
+			padding: 0 5px 0 1px;
+			width: 150px;
+			height: 75px;
+			font-size: 80%;
+			
+		}
+		.IO_box2 {
+			float: left;
+			margin: 0px 1px 1px 0px;
+			border: 1px solid blue;
+			padding: 0 1px 0 5px;
+			width: 35%;
+			height: 55px;
+			font-size: 70%;
+			
+		}
+		.IO_box3 {
+			float: left;
+			margin: 0 1px 1px 0;
+			border: 1px solid blue;
+			padding: 0 1px 0 5px;
+			width: 15%;
+			height: 55px;
+			font-size: 70%;
+			}
+		.AckButton {
+     			height: 28px;
+			}
+
+		.IO_box4 {
+			float: left;
+			margin: 0 20px 20px 0;
+			border: 1px solid blue;
+			padding: 0 5px 0 5px;
+			width: 650px;
+			font-size: 80%;
+		}
+		.IO_box5 {
+			float: left;
+			margin: 0 2px 2px 0;
+			border: 1px solid blue;
+			padding: 0 2px 0 2px;
+			width: 95px;
+			height: 165px;
+			font-size: 80%;
+			line-height: 2px;
+		}
+		h1 {
+			font-size: 120%;
+			color: blue;
+			margin: 0 0 10px 0;
+		}
+		h2 {
+			font-size: 85%;
+			color: #5734E6;
+			margin: 5px 0 5px 0;
+		}
+		h3 {
+			font-size: 70%;
+			color: #5734E6;
+			margin: 5px 0 5px 0;
+		}
+		p, form, button {
+			font-size: 80%;
+			color: #252525;
+          height: 23px;
+          width: 130px;
+      }
+		.small_text {
+			font-size: 70%;
+			color: #737373;
+		}
+		.coil_box {
+			float: left;
+			margin: 0 10px 10px 0;
+			border: 1px solid blue;
+			padding: 0 3px 0 3px;
+			width: 85%;
+			font-size: 61%;
+		}
+	</style></head><body onload="GetArduinoIO()">
+<h1>Arduino Alarm Display</h1>
+
+<h2>Alarm System - Displays a maximum of 16 alarms from the Arduino.</h2>
+
+
+<div style="height: 40%; width: 10%;" class="IO_box3">
+<h2>Alarm Status</h2>
+A0: <span id="AlarmS0" class="Alarm">.......</span><br><br>
+A1: <span  id="AlarmS1" class="Alarm">.......</span><br><br>
+A2: <span  id="AlarmS2" class="Alarm">.......</span><br><br>
+A3: <span  id="AlarmS3" class="Alarm">.......</span><br><br>
+A4: <span  id="AlarmS4" class="Alarm">.......</span><br><br>
+A5: <span  id="AlarmS5" class="Alarm">.......</span><br><br>
+A6: <span  id="AlarmS6" class="Alarm">.......</span><br><br>
+A7: <span  id="AlarmS7" class="Alarm">.......</span><br><br>
+A8: <span  id="AlarmS8" class="Alarm">.......</span><br><br>
+A9: <span  id="AlarmS9" class="Alarm">.......</span><br><br>
+A10: <span  id="AlarmS10" class="Alarm">.......</span><br><br>
+A11: <span  id="AlarmS11" class="Alarm">.......</span><br><br>
+A12: <span  id="AlarmS12" class="Alarm">.......</span><br><br>
+A13: <span  id="AlarmS13" class="Alarm">.......</span><br><br>
+A14: <span  id="AlarmS14" class="Alarm">.......</span><br><br>
+A15: <span  id="AlarmS15" class="Alarm">.......</span><br><br>
+</div>
+
+<div style="height: 40%; width: 25%;" class="IO_box2">
+<h2>Current Alarm Description</h2>
+A0: <span id="Alarm0" class="AlarmD">.......</span><br><br>
+A1: <span  id="Alarm1" class="AlarmD">.......</span><br><br>
+A2: <span  id="Alarm2" class="AlarmD">.......</span><br><br>
+A3: <span  id="Alarm3" class="AlarmD">.......</span><br><br>
+A4: <span  id="Alarm4" class="AlarmD">.......</span><br><br>
+A5: <span  id="Alarm5" class="AlarmD">.......</span><br><br>
+A6: <span  id="Alarm6" class="AlarmD">.......</span><br><br>
+A7: <span  id="Alarm7" class="AlarmD">.......</span><br><br>
+A8: <span  id="Alarm8" class="AlarmD">.......</span><br><br>
+A9: <span  id="Alarm9" class="AlarmD">.......</span><br><br>
+A10: <span  id="Alarm10" class="AlarmD">.......</span><br><br>
+A11: <span  id="Alarm11" class="AlarmD">.......</span><br><br>
+A12: <span  id="Alarm12" class="AlarmD">.......</span><br><br>
+A13: <span  id="Alarm13" class="AlarmD">.......</span><br><br>
+A14: <span  id="Alarm14" class="AlarmD">.......</span><br><br>
+A15: <span  id="Alarm15" class="AlarmD">.......</span><br><br>
+</div>
+
+<div style="height: 40%; width: 10%;" class="IO_box3">
+<h2>Triggered Status</h2>
+A0: <span id="AlarmTriggered0" class="TAlarm">.......</span><br><br>
+A1: <span  id="AlarmTriggered1" class="TAlarm">.......</span><br><br>
+A2: <span  id="AlarmTriggered2" class="TAlarm">.......</span><br><br>
+A3: <span  id="AlarmTriggered3" class="TAlarm">.......</span><br><br>
+A4: <span  id="AlarmTriggered4" class="TAlarm">.......</span><br><br>
+A5: <span  id="AlarmTriggered5" class="TAlarm">.......</span><br><br>
+A6: <span  id="AlarmTriggered6" class="TAlarm">.......</span><br><br>
+A7: <span  id="AlarmTriggered7" class="TAlarm">.......</span><br><br>
+A8: <span  id="AlarmTriggered8" class="TAlarm">.......</span><br><br>
+A9: <span  id="AlarmTriggered9" class="TAlarm">.......</span><br><br>
+A10: <span  id="AlarmTriggered10" class="TAlarm">.......</span><br><br>
+A11: <span  id="AlarmTriggered11" class="TAlarm">.......</span><br><br>
+A12: <span  id="AlarmTriggered12" class="TAlarm">.......</span><br><br>
+A13: <span  id="AlarmTriggered13" class="TAlarm">.......</span><br><br>
+A14: <span  id="AlarmTriggered14" class="TAlarm">.......</span><br><br>
+A15: <span  id="AlarmTriggered15" class="TAlarm">.......</span><br><br>
+</div>
+<div style="height: 40%; width: 10%;" class="IO_box3">
+<h2>Triggered AlarmTime</h2>
+AT0: <span id="AlarmTime0" class="T1Alarms">.......</span><br><br>
+AT1: <span  id="AlarmTime1" class="T1Alarms">.......</span><br><br>
+AT2: <span  id="AlarmTime2" class="T1Alarms">.......</span><br><br>
+AT3: <span  id="AlarmTime3" class="T1Alarms">.......</span><br><br>
+AT4: <span  id="AlarmTime4" class="T1Alarms">.......</span><br><br>
+AT5: <span  id="AlarmTime5" class="T1Alarms">.......</span><br><br>
+AT6: <span  id="AlarmTime6" class="T1Alarms">.......</span><br><br>
+AT7: <span  id="AlarmTime7" class="T1Alarms">.......</span><br><br>
+AT8: <span  id="AlarmTime8" class="T1Alarms">.......</span><br><br>
+AT9: <span  id="AlarmTime9" class="T1Alarms">.......</span><br><br>
+AT10: <span  id="AlarmTime10" class="T1Alarms">.......</span><br><br>
+AT11: <span  id="AlarmTime11" class="T1Alarms">.......</span><br><br>
+AT12: <span  id="AlarmTime12" class="T1Alarms">.......</span><br><br>
+AT13: <span  id="AlarmTime13" class="T1Alarms">.......</span><br><br>
+AT14: <span  id="AlarmTime14" class="T1Alarms">.......</span><br><br>
+AT15: <span  id="AlarmTime15" class="T1Alarms">.......</span><br><br>
+</div>
+<div style="height: 40%; width: 10%;" class="IO_box3">
+<h2>Serivce in Alarm</h2>
+A0: <span id="Alarm0" class="SAlarm">.......</span><br><br>
+A1: <span  id="Alarm1" class="SAlarm">.......</span><br><br>
+A2: <span  id="Alarm2" class="SAlarm">.......</span><br><br>
+A3: <span  id="Alarm3" class="SAlarm">.......</span><br><br>
+A4: <span  id="Alarm4" class="SAlarm">.......</span><br><br>
+A5: <span  id="Alarm5" class="SAlarm">.......</span><br><br>
+A6: <span  id="Alarm6" class="SAlarm">.......</span><br><br>
+A7: <span  id="Alarm7" class="SAlarm">.......</span><br><br>
+A8: <span  id="Alarm8" class="SAlarm">.......</span><br><br>
+A9: <span  id="Alarm9" class="SAlarm">.......</span><br><br>
+A10: <span  id="Alarm10" class="SAlarm">.......</span><br><br>
+A11: <span  id="Alarm11" class="SAlarm">.......</span><br><br>
+A12: <span  id="Alarm12" class="SAlarm">.......</span><br><br>
+A13: <span  id="Alarm13" class="SAlarm">.......</span><br><br>
+A14: <span  id="Alarm14" class="SAlarm">.......</span><br><br>
+A15: <span  id="Alarm15" class="SAlarm">.......</span><br><br>
+</div>
+
+<div style="height: 40%; width: 10%;" class="IO_box3">
+<h2>Function in Alarm</h2>
+A0: <span id="Alarm0" class="FnAlarm">.......</span><br><br>
+A1: <span  id="Alarm1" class="FnAlarm">.......</span><br><br>
+A2: <span  id="Alarm2" class="FnAlarm">.......</span><br><br>
+A3: <span  id="Alarm3" class="FnAlarm">.......</span><br><br>
+A4: <span  id="Alarm4" class="FnAlarm">.......</span><br><br>
+A5: <span  id="Alarm5" class="FnAlarm">.......</span><br><br>
+A6: <span  id="Alarm6" class="FnAlarm">.......</span><br><br>
+A7: <span  id="Alarm7" class="FnAlarm">.......</span><br><br>
+A8: <span  id="Alarm8" class="FnAlarm">.......</span><br><br>
+A9: <span  id="Alarm9" class="FnAlarm">.......</span><br><br>
+A10: <span  id="Alarm10" class="FnAlarm">.......</span><br><br>
+A11: <span  id="Alarm11" class="FnAlarm">.......</span><br><br>
+A12: <span  id="Alarm12" class="FnAlarm">.......</span><br><br>
+A13: <span  id="Alarm13" class="FnAlarm">.......</span><br><br>
+A14: <span  id="Alarm14" class="FnAlarm">.......</span><br><br>
+A15: <span  id="Alarm15" class="FnAlarm">.......</span><br><br>
+</div>
+
+
+<div style="height: 40%; width: 15%;" class="IO_box3">
+<h2>Alarm Acknowledge</h2>
+
+<button class="AckButton"  type="button" id="AA0" onclick="GetButton(0)">Acknowledge Alarm 0</button>
+<button class="AckButton" type="button" id="AA1" onclick="GetButton(1)">Acknowledge Alarm 1</button>
+<button class="AckButton" type="button" id="AA2" onclick="GetButton(2)">Acknowledge Alarm 2</button>
+<button class="AckButton" type="button" id="AA3" onclick="GetButton(3)">Acknowledge Alarm 3</button>
+<button class="AckButton"  type="button" id="AA4" onclick="GetButton(4)">Acknowledge Alarm 4</button>
+<button class="AckButton"  type="button" id="AA5" onclick="GetButton(5)">Acknowledge Alarm 5</button>
+<button class="AckButton"  type="button" id="AA6" onclick="GetButton(6)">Acknowledge Alarm 6</button>
+<button class="AckButton"  type="button" id="AA7" onclick="GetButton(7)">Acknowledge Alarm 7</button>
+<button class="AckButton"  type="button" id="AA8" onclick="GetButton(8)">Acknowledge Alarm 8</button>
+<button class="AckButton"  type="button" id="AA9" onclick="GetButton(9)">Acknowledge Alarm 9</button>
+<button class="AckButton"  type="button" id="AA10" onclick="GetButton(10)">Acknowledge Alarm 10</button>
+<button class="AckButton"  type="button" id="AA11" onclick="GetButton(11)">Acknowledge Alarm 11</button>
+<button class="AckButton"  type="button" id="AA12" onclick="GetButton(12)">Acknowledge Alarm 12</button>
+<button class="AckButton"  type="button" id="AA13" onclick="GetButton(13)">Acknowledge Alarm 13</button>
+<button class="AckButton"  type="button" id="AA14" onclick="GetButton(14)">Acknowledge Alarm 14</button>
+<button class="AckButton"  type="button" id="AA15" onclick="GetButton(15)">Acknowledge Alarm 15</button>
+</div>
+<div style="width: 85%; margin-top: 20px; height: 40%;" class="IO_box2">
+
+<h2 style="width: 85%; margin-top: 5px; height: 10px;">Alarm Colour Key: </h2>
+<table width="100%">
+
+  <tbody>
+    <tr>
+      <td bgcolor="red">Alarm has triggered, current and not acknoeldged <br>
+      </td>
+      <td bgcolor="Orange">Alarm not Acknowledged but alarm gone<br>
+      </td>
+     <td bgcolor="yellow">Acknowledged but alarm still current <br>
+      </td>
+      <td bgcolor="green">No longer an Alarm and Acknowledged<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<button type="button" id="Info"onclick="Inf()">Info(!)</button>
+</body></html>
