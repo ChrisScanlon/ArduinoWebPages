@@ -1,4 +1,6 @@
 <?php
+header('Content-type: application/jsonp');
+header('Access-Control-Allow-Origin: *');
 
 /**
  * Represent a custom directory class call DirectoryLister where path is detailed
